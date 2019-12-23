@@ -34,7 +34,7 @@ public class MailTests {
       String contents = templateEgine.process("/mail/demo",context);
       System.out.println(contents);
 
-       mailClient.sendMail("huangxin2525074@sina.com","html",contents);
+       mailClient.sendMail("huangxin2525074@gmail.com","html",contents);
    }
 
 
