@@ -151,7 +151,6 @@ public class UserService implements communityConstant {
 
         // password validations
         password = communityUtil.md5(password+user.getSalt());
-        System.out.println(password);
         if(!user.getPassword().equals(password)){
             map.put("passwordMsg","password not valid");
             return map;
@@ -176,6 +175,63 @@ public class UserService implements communityConstant {
 
     public void logout(String ticket){
         loginTicketMapper.updateStatus(ticket, 1);
+    }
+
+    public LoginTicket findLoginTicket(String ticket){
+        return loginTicketMapper.selectByTicket(ticket);
+    }
+
+    public int updateHeader(int userId, String headerUrl){
+      return userMapper.updateHeader(userId,headerUrl);
+    }
+
+    public Map<String,Object> updatePassword(int userId, String password, String newPassword,String confirmPassword){
+
+          Map<String,Object> map = new HashMap<>();
+
+          if(StringUtils.isBlank(password)){
+              map.put("passwordMsg","empty password not allow");
+              return map;
+          }
+          if(StringUtils.isBlank(newPassword)){
+            map.put("newPasswordMsg","empty password not allow");
+            return map;
+          }
+          if(StringUtils.isBlank(confirmPassword)){
+              map.put("confirmPasswordMsg","empty password not allow");
+              return map;
+          }
+
+        User user = userMapper.selectById(userId);
+
+        password = communityUtil.md5(password+user.getSalt());
+        if(!user.getPassword().equals(password)){
+            map.put("passwordMsg","password not valid");
+            return map;
+        }
+
+        newPassword = communityUtil.md5(newPassword+user.getSalt());
+        if(user.getPassword().equals(newPassword)){
+            map.put("newPasswordMsg","password not valid, please enter different password");
+            return map;
+        }
+
+        confirmPassword = communityUtil.md5(confirmPassword+user.getSalt());
+        if(!newPassword.equals(confirmPassword)){
+            map.put("confirmPasswordMsg","new password and confirm password must be the same");
+            return map;
+        }
+        if(user.getPassword().equals(newPassword)){
+            map.put("confirmPasswordMsg","password not valid, please enter different password");
+            return map;
+        }
+
+
+
+        userMapper.updatePassword(userId,confirmPassword);
+
+
+          return map;
     }
 
 
