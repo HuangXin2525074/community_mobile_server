@@ -1,5 +1,6 @@
 package com.mycomany.community.controller;
 
+import com.mycomany.community.annotation.LoginRequired;
 import com.mycomany.community.entity.User;
 import com.mycomany.community.services.UserService;
 import com.mycomany.community.util.HostHolder;
@@ -44,11 +45,15 @@ public class UserController {
     @Autowired
     private HostHolder hostHolder;
 
+
+  @LoginRequired
   @RequestMapping(path = "/setting",method = RequestMethod.GET)
   public String getSettingPage(){
       return "/site/setting";
   }
 
+
+  @LoginRequired
   @RequestMapping(path ="/upload",method= RequestMethod.POST)
     public String uploadHeader(MultipartFile headerImage, Model model){
      if(headerImage ==null){
@@ -87,6 +92,7 @@ public class UserController {
       return "redirect:/index";
   }
 
+
   @RequestMapping(path = "/header/{fileName}",method = RequestMethod.GET)
     public void getHeader(@PathVariable("fileName") String fileName, HttpServletResponse response){
 
@@ -114,6 +120,8 @@ public class UserController {
 
       }
 
+
+      @LoginRequired
       @RequestMapping(path = "/updatePassword", method = RequestMethod.POST)
       public String updatePassword(Model model, String password, String newPassword, String confirmPassword){
 
