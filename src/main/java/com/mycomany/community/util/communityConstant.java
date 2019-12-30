@@ -17,5 +17,14 @@ public interface communityConstant {
    // save expired time for ticket
    int REMEMBER_EXPIRED_SECONDS= 3600*12*100;
 
+   // set entity type
+
+   int ENTITY_TYPE_POST = 1;
+
+   // set entity comment
+
+   int ENTITY_TYPE_COMMENT=2;
+
+
 
 }

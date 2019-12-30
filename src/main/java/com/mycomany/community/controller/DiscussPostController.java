@@ -1,7 +1,10 @@
 package com.mycomany.community.controller;
 
+import com.mycomany.community.entity.Comment;
 import com.mycomany.community.entity.DiscussPost;
+import com.mycomany.community.entity.Page;
 import com.mycomany.community.entity.User;
+import com.mycomany.community.services.CommentService;
 import com.mycomany.community.services.DiscussPostService;
 import com.mycomany.community.services.UserService;
 import com.mycomany.community.util.HostHolder;
@@ -13,12 +16,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
+import com.mycomany.community.util.communityConstant;
 
-import java.util.Date;
+import java.util.*;
 
 @Controller
 @RequestMapping("/discuss")
-public class DiscussPostController {
+public class DiscussPostController implements communityConstant {
 
   @Autowired
   private DiscussPostService discussPostService;
@@ -28,6 +32,9 @@ public class DiscussPostController {
 
   @Autowired
   private UserService userService;
+
+  @Autowired
+  private CommentService commentService;
 
 
   @RequestMapping(path = "/add", method = RequestMethod.POST)
@@ -50,7 +57,7 @@ public class DiscussPostController {
   }
 
   @RequestMapping(path = "/detail/{discussPostId}",method = RequestMethod.GET)
-  public String getDiscussPost(@PathVariable("discussPostId") int discussPostId, Model model){
+  public String getDiscussPost(@PathVariable("discussPostId") int discussPostId, Model model, Page page){
 
     DiscussPost post = discussPostService.findDiscussPostById(discussPostId);
     model.addAttribute("post",post);
@@ -58,9 +65,61 @@ public class DiscussPostController {
     User user = userService.findUserById(post.getUserId());
     model.addAttribute("user",user);
 
+    page.setLimit(5);
+    page.setPath("/discuss/detail/" + discussPostId);
+    page.setRows(post.getCommentCount());
+
+    // comment for post.
+    // reply of the comment.
+    List<Comment> commentList = commentService.findCommentsByEntity(ENTITY_TYPE_POST,post.getId(),page.getOffset(),page.getLimit());
+
+    List<Map<String, Object>> commentVoList = new ArrayList<>();
+    if(commentList!=null){
+      for(Comment comment : commentList){
+        // comment view object
+        Map<String, Object> commentVo = new HashMap<>();
+        // add comment
+        commentVo.put("comment",comment);
+        //add user.
+        commentVo.put("user",userService.findUserById(comment.getUserId()));
+
+        // reply list
+        List<Comment> replyList = commentService.findCommentsByEntity(ENTITY_TYPE_COMMENT,comment.getId(),0,Integer.MAX_VALUE);
+
+        List<Map<String, Object>> replyVoList = new ArrayList<>();
+        if(replyList!=null) {
+          for (Comment reply : replyList) {
+            Map<String, Object> replyVo = new HashMap<>();
+            // add reply Msg
+            replyVo.put("reply", reply);
+
+            // add reply user
+            replyVo.put("user", userService.findUserById(reply.getUserId()));
+
+            // reply by target
+            User target = reply.getTargetId() ==0 ? null:userService.findUserById(reply.getTargetId());
+            replyVo.put("target",target);
+
+            replyVoList.add(replyVo);
+
+
+          }
+        }
+        commentVo.put("replys",replyVoList);
+
+        // add number of count of replys
+        int replyCount = commentService.findCommentCount(ENTITY_TYPE_COMMENT,comment.getId());
+        commentVo.put("replyCount",replyCount);
+
+        commentVoList.add(commentVo);
+
+      }
+
+    }
+
+    model.addAttribute("comments",commentVoList);
+
     return "/site/discuss-detail";
-
-
 
   }
 }
