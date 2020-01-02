@@ -2,9 +2,13 @@ package com.mycomany.community.controller;
 
 import com.mycomany.community.annotation.LoginRequired;
 import com.mycomany.community.entity.User;
+import com.mycomany.community.services.FollowService;
+import com.mycomany.community.services.LikeService;
 import com.mycomany.community.services.UserService;
 import com.mycomany.community.util.HostHolder;
 import com.mycomany.community.util.communityUtil;
+import com.mycomany.community.util.communityConstant;
+import com.sun.org.apache.xpath.internal.operations.Mod;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +30,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/user")
-public class UserController {
+public class UserController implements communityConstant{
 
     private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -44,6 +48,12 @@ public class UserController {
 
     @Autowired
     private HostHolder hostHolder;
+
+    @Autowired
+    private LikeService likeService;
+
+    @Autowired
+    private FollowService followService;
 
 
   @LoginRequired
@@ -138,6 +148,41 @@ public class UserController {
           }
 
       }
+
+      // dashboard Page.
+     @RequestMapping(path = "/profile/{userId}",method =RequestMethod.GET)
+    public String getProfilePage(@PathVariable("userId")int userId, Model model){
+      User user = userService.findUserById(userId);
+      if(user ==null){
+          throw new RuntimeException("user did not exist");
+      }
+
+      // add user
+      model.addAttribute("user",user);
+
+      // Number of like in total
+     int likeCount = likeService.finalUserLikeCount(userId);
+     model.addAttribute("likeCount",likeCount);
+
+     // number of following
+     long followeeCount = followService.findFolloweeCount(userId, ENTITY_TYPE_USER);
+     model.addAttribute("followeeCount",followeeCount);
+
+
+     // number of follower
+     long followerCount = followService.findFollowerCount(ENTITY_TYPE_USER,userId);
+     model.addAttribute("followerCount",followerCount);
+
+     // check whether is follow this user.
+     boolean hasFollowed = false;
+     if(hostHolder.getUser() !=null){
+         hasFollowed=followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
+     }
+     model.addAttribute("hasFollowed",hasFollowed);
+
+
+     return "/site/profile";
+     }
 
 
 

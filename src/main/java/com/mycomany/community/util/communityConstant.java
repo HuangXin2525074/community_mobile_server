@@ -25,6 +25,9 @@ public interface communityConstant {
 
    int ENTITY_TYPE_COMMENT=2;
 
+   // set entity user
+   int ENTITY_TYPE_USER =3;
+
 
 
 }
