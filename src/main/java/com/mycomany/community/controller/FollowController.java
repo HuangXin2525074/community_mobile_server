@@ -1,8 +1,10 @@
 package com.mycomany.community.controller;
 
 
+import com.mycomany.community.entity.Event;
 import com.mycomany.community.entity.Page;
 import com.mycomany.community.entity.User;
+import com.mycomany.community.event.EventProducer;
 import com.mycomany.community.services.FollowService;
 import com.mycomany.community.services.UserService;
 import com.mycomany.community.util.HostHolder;
@@ -31,12 +33,26 @@ public class FollowController implements communityConstant {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private EventProducer eventProducer;
+
     @RequestMapping(path = "/follow",method = RequestMethod.POST)
     @ResponseBody
     public String follow(int entityType, int entityId){
         User user = hostHolder.getUser();
 
         followService.follow(user.getId(),entityType,entityId);
+
+        // fire following event
+        Event event = new Event()
+                .setTopic(TOPIC_FOLLOW)
+                .setUserId(hostHolder.getUser().getId())
+                .setEntityType(entityType)
+                .setEntityId(entityId)
+                .setEntityUserId(entityId);
+
+        eventProducer.fireEvent(event);
+
 
         return communityUtil.getJSONString(0,"following");
 
