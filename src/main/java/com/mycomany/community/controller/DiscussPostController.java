@@ -1,9 +1,7 @@
 package com.mycomany.community.controller;
 
-import com.mycomany.community.entity.Comment;
-import com.mycomany.community.entity.DiscussPost;
-import com.mycomany.community.entity.Page;
-import com.mycomany.community.entity.User;
+import com.mycomany.community.entity.*;
+import com.mycomany.community.event.EventProducer;
 import com.mycomany.community.services.CommentService;
 import com.mycomany.community.services.DiscussPostService;
 import com.mycomany.community.services.LikeService;
@@ -40,6 +38,9 @@ public class DiscussPostController implements communityConstant {
   @Autowired
   private LikeService likeService;
 
+  @Autowired
+  private EventProducer eventProducer;
+
 
   @RequestMapping(path = "/add", method = RequestMethod.POST)
    @ResponseBody
@@ -56,6 +57,16 @@ public class DiscussPostController implements communityConstant {
       post.setContent(content);
       post.setCreateTime(new Date());
       discussPostService.addDiscussPost(post);
+
+      // trigger the event
+    Event event = new Event()
+            .setTopic(TOPIC_PUBLISH)
+            .setUserId(user.getId())
+            .setEntityType(ENTITY_TYPE_POST)
+            .setEntityId(post.getId());
+    eventProducer.fireEvent(event);
+
+
 
       return communityUtil.getJSONString(0,"Post content success");
   }
