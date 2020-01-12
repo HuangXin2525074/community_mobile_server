@@ -16,8 +16,8 @@ public class WebMvcConfig implements WebMvcConfigurer {
 @Autowired
 private LoginTicketInterceptor loginTicketInterceptor;
 
-@Autowired
-private LoginRequiredInterceptor loginRequiredInterceptor;
+//@Autowired
+//private LoginRequiredInterceptor loginRequiredInterceptor;
 
 @Autowired
 private MessageInterceptor messageInterceptor;
@@ -29,8 +29,8 @@ private MessageInterceptor messageInterceptor;
         registry.addInterceptor(loginTicketInterceptor).
                 excludePathPatterns("/**/*.cs","/**/*.js","/**/*.png","/**/*.jpg","/**/*.jpeg");
 
-        registry.addInterceptor(loginRequiredInterceptor).
-                excludePathPatterns("/**/*.cs","/**/*.js","/**/*.png","/**/*.jpg","/**/*.jpeg");
+//        registry.addInterceptor(loginRequiredInterceptor).
+//                excludePathPatterns("/**/*.cs","/**/*.js","/**/*.png","/**/*.jpg","/**/*.jpeg");
 
         registry.addInterceptor(messageInterceptor).
                 excludePathPatterns("/**/*.cs","/**/*.js","/**/*.png","/**/*.jpg","/**/*.jpeg");

@@ -5,6 +5,16 @@ $(function(){
 function publish() {
 	$("#publishModal").modal("hide");
 
+
+	// insert CSRF Keys into content header.
+	// var token = $("meta[name='_csrf']").attr("content");
+	// var header = $("meta[name='_csrf_header']").attr("content");
+	// $(document).ajaxSend(function (e, xhr,options) {
+	// 	xhr.setRequestHeader(header, token);
+	// });
+
+
+
 	// getting title and content.
 	var title = $("#recipient-name").val();
 	var content = $("#message-text").val();
