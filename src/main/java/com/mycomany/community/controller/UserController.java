@@ -1,7 +1,10 @@
 package com.mycomany.community.controller;
 
 import com.mycomany.community.annotation.LoginRequired;
+import com.mycomany.community.entity.DiscussPost;
+import com.mycomany.community.entity.Page;
 import com.mycomany.community.entity.User;
+import com.mycomany.community.services.DiscussPostService;
 import com.mycomany.community.services.FollowService;
 import com.mycomany.community.services.LikeService;
 import com.mycomany.community.services.UserService;
@@ -26,6 +29,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Controller
@@ -54,6 +60,9 @@ public class UserController implements communityConstant{
 
     @Autowired
     private FollowService followService;
+
+    @Autowired
+    private DiscussPostService discussPostService;
 
 
   @LoginRequired
@@ -183,6 +192,39 @@ public class UserController implements communityConstant{
 
      return "/site/profile";
      }
+
+
+    @RequestMapping(path = "my-post/{userId}", method = RequestMethod.GET)
+    public String getDiscussPostByUserId(@PathVariable("userId") int userId, Model model, Page page){
+
+        page.setLimit(5);
+        page.setPath("/my-post/"+userId);
+        page.setRows(discussPostService.findDiscussPostRows(userId));
+
+        List<DiscussPost> list = discussPostService.findDiscussPosts(userId, page.getOffset(), page.getLimit());
+        List<Map<String,Object>> discussPosts = new ArrayList<>();
+        if(list != null){
+            for(DiscussPost post:list) {
+
+                Map<String,Object> map = new HashMap<>();
+                map.put("post",post);
+                User user = userService.findUserById(userId);
+                map.put("user",user);
+
+                long likeCount = likeService.findEntityLikeCount(ENTITY_TYPE_POST,post.getId());
+                map.put("likeCount",likeCount);
+
+                discussPosts.add(map);
+
+            }
+        }
+
+
+        model.addAttribute("postCount",discussPostService.findDiscussPostRows(userId));
+        model.addAttribute("discussPosts",discussPosts);
+
+        return "/site/my-post";
+    }
 
 
 

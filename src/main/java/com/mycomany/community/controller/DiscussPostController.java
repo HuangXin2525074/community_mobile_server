@@ -168,6 +168,7 @@ public class DiscussPostController implements communityConstant {
 
   }
 
+
   @RequestMapping(path = "/top", method = RequestMethod.POST)
   @ResponseBody
   public String setTop(int id){
