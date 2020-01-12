@@ -43,6 +43,8 @@ public interface communityConstant {
 
    String TOPIC_PUBLISH="publish";
 
+   String TOPIC_DELETE="delete";
+
    // Authority type
    String AUTHORITY_USER = "user";
 
