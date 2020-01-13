@@ -42,6 +42,24 @@
         where id= #{id}
     </select>
 
+    <select id="selectCommentsByUserId" resultType="Comment">
+        select <include refid="selectFields"></include>
+        from comment
+        where status=0
+        and user_id = #{userId}
+        order by create_time asc
+        limit #{offset}, #{limit}
+
+    </select>
+
+    <select id="findCommentsCountByUserId" resultType="int">
+        select count(id)
+       from comment
+       where status=0
+        and user_id = #{userId}
+
+    </select>
+
 
 
 

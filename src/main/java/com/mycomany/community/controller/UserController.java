@@ -1,13 +1,11 @@
 package com.mycomany.community.controller;
 
 import com.mycomany.community.annotation.LoginRequired;
+import com.mycomany.community.entity.Comment;
 import com.mycomany.community.entity.DiscussPost;
 import com.mycomany.community.entity.Page;
 import com.mycomany.community.entity.User;
-import com.mycomany.community.services.DiscussPostService;
-import com.mycomany.community.services.FollowService;
-import com.mycomany.community.services.LikeService;
-import com.mycomany.community.services.UserService;
+import com.mycomany.community.services.*;
 import com.mycomany.community.util.HostHolder;
 import com.mycomany.community.util.communityUtil;
 import com.mycomany.community.util.communityConstant;
@@ -63,6 +61,9 @@ public class UserController implements communityConstant{
 
     @Autowired
     private DiscussPostService discussPostService;
+
+    @Autowired
+    private CommentService commentService;
 
 
   @LoginRequired
@@ -198,7 +199,7 @@ public class UserController implements communityConstant{
     public String getDiscussPostByUserId(@PathVariable("userId") int userId, Model model, Page page){
 
         page.setLimit(5);
-        page.setPath("/my-post/"+userId);
+        page.setPath("/user/my-post/"+userId);
         page.setRows(discussPostService.findDiscussPostRows(userId));
 
         List<DiscussPost> list = discussPostService.findDiscussPosts(userId, page.getOffset(), page.getLimit());
@@ -225,6 +226,48 @@ public class UserController implements communityConstant{
 
         return "/site/my-post";
     }
+
+
+    @RequestMapping(path = "my-reply/{userId}", method = RequestMethod.GET)
+    public String getCommentsByUserId(@PathVariable("userId") int userId, Model model, Page page){
+
+        page.setLimit(5);
+        page.setPath("/user/my-reply/"+userId);
+        page.setRows(commentService.findCommentCountByUserId(userId));
+
+        List<Comment> list = commentService.findCommentsByUserId(userId, page.getOffset(), page.getLimit());
+        List<Map<String,Object>> comments = new ArrayList<>();
+        if(list != null){
+            for(Comment reply:list) {
+
+                Map<String,Object> map = new HashMap<>();
+                map.put("reply",reply);
+                User user = userService.findUserById(userId);
+                map.put("user",user);
+
+                if(reply.getEntityType()==ENTITY_TYPE_POST) {
+
+                    DiscussPost post = discussPostService.findDiscussPostById(reply.getEntityId());
+                    map.put("post", post);
+                } else if(reply.getEntityType() == ENTITY_TYPE_COMMENT){
+
+                    Comment target = commentService.findCommentById(reply.getEntityId());
+                    DiscussPost post = discussPostService.findDiscussPostById(target.getEntityId());
+                    map.put("post", post);
+                }
+
+                comments.add(map);
+
+            }
+        }
+        model.addAttribute("commentCount",commentService.findCommentCountByUserId(userId));
+        model.addAttribute("comments",comments);
+
+        return "/site/my-reply";
+    }
+
+
+
 
 
 
