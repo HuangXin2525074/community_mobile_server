@@ -7,8 +7,10 @@ import com.mycomany.community.services.DiscussPostService;
 import com.mycomany.community.services.LikeService;
 import com.mycomany.community.services.UserService;
 import com.mycomany.community.util.HostHolder;
+import com.mycomany.community.util.RedisKeyUtil;
 import com.mycomany.community.util.communityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,6 +43,9 @@ public class DiscussPostController implements communityConstant {
   @Autowired
   private EventProducer eventProducer;
 
+  @Autowired
+  private RedisTemplate redisTemplate;
+
 
   @RequestMapping(path = "/add", method = RequestMethod.POST)
    @ResponseBody
@@ -65,6 +70,9 @@ public class DiscussPostController implements communityConstant {
             .setEntityType(ENTITY_TYPE_POST)
             .setEntityId(post.getId());
     eventProducer.fireEvent(event);
+
+    String redisKey = RedisKeyUtil.getPostScoreKey();
+    redisTemplate.opsForSet().add(redisKey,post.getId());
 
 
 
@@ -200,6 +208,9 @@ public class DiscussPostController implements communityConstant {
             .setEntityId(id);
     eventProducer.fireEvent(event);
 
+    String redisKey = RedisKeyUtil.getPostScoreKey();
+    redisTemplate.opsForSet().add(redisKey,id);
+
     return communityUtil.getJSONString(0);
 
   }
@@ -220,6 +231,8 @@ public class DiscussPostController implements communityConstant {
     return communityUtil.getJSONString(0);
 
   }
+
+
 
 
 }

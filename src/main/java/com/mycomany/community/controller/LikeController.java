@@ -6,9 +6,11 @@ import com.mycomany.community.entity.User;
 import com.mycomany.community.event.EventProducer;
 import com.mycomany.community.services.LikeService;
 import com.mycomany.community.util.HostHolder;
+import com.mycomany.community.util.RedisKeyUtil;
 import com.mycomany.community.util.communityUtil;
 import com.mycomany.community.util.communityConstant;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -28,6 +30,9 @@ public class LikeController implements communityConstant{
 
     @Autowired
     private EventProducer eventProducer;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @RequestMapping(path = "/like",method = RequestMethod.POST)
     @ResponseBody
@@ -56,6 +61,11 @@ public class LikeController implements communityConstant{
                     .setData("postId",postId);
 
             eventProducer.fireEvent(event);
+        }
+
+        if(entityType == ENTITY_TYPE_POST){
+            String redisKey = RedisKeyUtil.getPostScoreKey();
+            redisTemplate.opsForSet().add(redisKey,postId);
         }
 
         return communityUtil.getJSONString(0,null, map);

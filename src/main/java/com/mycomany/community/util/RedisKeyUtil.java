@@ -13,6 +13,7 @@ public class RedisKeyUtil {
 
     private static final String PREFIX_UV= "uv";
     private static final String PREFIX_DAU= "dau";
+    private static final String PREFIX_POST= "post";
 
 
     //like: entity:entityType:entityId ->set(userId)
@@ -65,6 +66,11 @@ public class RedisKeyUtil {
 
     public static String getDAUKey(String startDate, String endDate){
         return  PREFIX_DAU + SPLIT + startDate + endDate;
+    }
+
+    // count score of the discuss post
+    public static String getPostScoreKey(){
+        return PREFIX_POST + SPLIT + "score";
     }
 
 
