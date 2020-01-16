@@ -22,7 +22,7 @@ import java.util.Date;
 
 public class PostScoreRefreshJob implements Job, communityConstant {
 
-    private static Logger logger = LoggerFactory.getLogger(PostScoreRefreshJob.class);
+    private static final Logger logger = LoggerFactory.getLogger(PostScoreRefreshJob.class);
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -41,7 +41,7 @@ public class PostScoreRefreshJob implements Job, communityConstant {
 
     static{
         try {
-            epoch = new SimpleDateFormat("yyyy-MM-dd").parse("2014-08-01 00:00:00");
+            epoch = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse("2014-08-01 00:00:00");
         } catch (ParseException e) {
             throw new RuntimeException("init error!", e);
         }

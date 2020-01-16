@@ -94,13 +94,6 @@ public class FollowController implements communityConstant {
         return "/site/followee";
     }
 
-    private boolean hasFollowed(int userId){
-        if(hostHolder.getUser() == null){
-            return false;
-        }
-
-        return followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
-    }
 
 
     @RequestMapping(path = "/followers/{userId}", method = RequestMethod.GET)
@@ -126,5 +119,13 @@ public class FollowController implements communityConstant {
 
 
         return "/site/follower";
+    }
+
+    private boolean hasFollowed(int userId){
+        if(hostHolder.getUser() == null){
+            return false;
+        }
+
+        return followService.hasFollowed(hostHolder.getUser().getId(),ENTITY_TYPE_USER,userId);
     }
 }

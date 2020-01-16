@@ -15,7 +15,7 @@ import java.util.Date;
 public class DataController {
 
     @Autowired
-    DataService dataService;
+    private DataService dataService;
 
 
     @RequestMapping(path = "/data", method = {RequestMethod.GET, RequestMethod.POST})
@@ -26,8 +26,7 @@ public class DataController {
 
     @RequestMapping(path = "/data/uv",method = RequestMethod.POST)
     public String getUV(@DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
-                        @DateTimeFormat(pattern = "yyyy-MM-dd")Date end,
-                        Model model){
+                        @DateTimeFormat(pattern = "yyyy-MM-dd")Date end, Model model){
 
 
         long uv = dataService.calculateUV(start,end);
@@ -42,8 +41,7 @@ public class DataController {
 
     @RequestMapping(path = "/data/dau",method = RequestMethod.POST)
     public String getDAU(@DateTimeFormat(pattern = "yyyy-MM-dd") Date start,
-                        @DateTimeFormat(pattern = "yyyy-MM-dd")Date end,
-                        Model model){
+                        @DateTimeFormat(pattern = "yyyy-MM-dd")Date end, Model model){
 
 
         long dau = dataService.calculateDAU(start,end);

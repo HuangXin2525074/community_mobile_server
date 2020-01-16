@@ -73,9 +73,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements comm
                     // non-login
                     @Override
                     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException e) throws IOException, ServletException {
-                    String xRequestWith = request.getHeader("x-request-with");
-                    if("XMLHttpRequest".equals(xRequestWith)){
-                        response.setContentType("application/plain;charset=utf8");
+                    String xRequestedWith = request.getHeader("x-requested-with");
+                    if("XMLHttpRequest".equals(xRequestedWith)){
+                        response.setContentType("application/plain;charset=utf-8");
                         PrintWriter writer = response.getWriter();
                         writer.write(communityUtil.getJSONString(403,"please login your account!"));
 
@@ -88,8 +88,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter implements comm
 
                     @Override
                     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException e) throws IOException, ServletException {
-                        String xRequestWith = request.getHeader("x-request-with");
-                        if("XMLHttpRequest".equals(xRequestWith)){
+                        String xRequestedWith = request.getHeader("x-requested-with");
+                        if("XMLHttpRequest".equals(xRequestedWith)){
                             response.setContentType("application/plain;charset=utf8");
                             PrintWriter writer = response.getWriter();
                             writer.write(communityUtil.getJSONString(403,"no permission to access!"));
