@@ -116,6 +116,60 @@ public class UserService implements communityConstant {
         return map;
     }
 
+
+    public Map<String,Object> resetPassword(User user,String verification_code,String newPassword){
+
+        Map<String,Object> map = new HashMap<>();
+
+        if(user ==null){
+            throw new IllegalArgumentException("empty value not allow");
+        }
+
+        if(StringUtils.isBlank(user.getEmail())){
+            map.put("emailMsg","empty email not allow");
+            return map;
+        }
+        if(StringUtils.isBlank(verification_code)){
+            map.put("codeMsg","empty verification code not allow");
+            return map;
+        }
+        if(StringUtils.isBlank(newPassword)){
+            map.put("newPasswordMsg","empty password not allow");
+        }
+
+
+        User u = userMapper.selectByEmail(user.getEmail());
+        if(u == null){
+            map.put("emailMsg","account not exist");
+            return map;
+        }
+
+        newPassword= communityUtil.md5(newPassword+u.getSalt());
+
+        if(u.getPassword().equals(newPassword)){
+            map.put("newPasswordMsg","password not valid, please enter different password");
+            return map;
+        }
+
+        String redisKey = RedisKeyUtil.getCodeKey(u.getId());
+        String code =(String)redisTemplate.opsForValue().get(redisKey);
+
+
+        if(code==null){
+            map.put("codeMsg","verification code expired");
+            return map;
+        }
+        if(!code.equals(verification_code)){
+            map.put("codeMsg","wrong verification code");
+            return map;
+        }
+
+        u.setPassword(newPassword);
+
+          return map;
+
+    }
+
     public int activation(int userId, String code){
 
        User user = userMapper.selectById(userId);

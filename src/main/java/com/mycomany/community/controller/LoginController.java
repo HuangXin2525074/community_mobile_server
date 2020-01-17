@@ -1,8 +1,10 @@
 package com.mycomany.community.controller;
 
 import com.google.code.kaptcha.Producer;
+import com.mycomany.community.dao.UserMapper;
 import com.mycomany.community.entity.User;
 import com.mycomany.community.services.UserService;
+import com.mycomany.community.util.MailClient;
 import com.mycomany.community.util.RedisKeyUtil;
 import com.mycomany.community.util.communityConstant;
 import com.mycomany.community.util.communityUtil;
@@ -15,10 +17,9 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.CookieValue;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.imageio.ImageIO;
 import javax.servlet.http.Cookie;
@@ -44,8 +45,22 @@ public class LoginController implements communityConstant{
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Autowired
+    private MailClient mailClient;
+
+    @Autowired
+    private TemplateEngine templateEngine;
+
+    @Autowired
+    private UserMapper userMapper;
+
     @Value("${server.servlet.context-path}")
     private String contextPath;
+
+    @Value("${community.path.domain}")
+    private String domain;
+
+
 
     @RequestMapping(path="/register", method = RequestMethod.GET)
     public String getRegisterPage(){
@@ -74,6 +89,62 @@ public class LoginController implements communityConstant{
        }
 
     }
+
+    @RequestMapping(path = "/forgetPassword",method = RequestMethod.GET)
+    public String forgetPassword(){
+        return "/site/forget";
+    }
+
+    @RequestMapping(path = "/forgetPassword",method = RequestMethod.POST)
+    public String forgetPassword(Model model, User user, String code, String newPassword){
+
+        Map<String, Object> map = userService.resetPassword(user,code,newPassword);
+        if(map==null || map.isEmpty()){
+            model.addAttribute("target","/login");
+            return "/site/login";
+
+        }else{
+            model.addAttribute("emailMsg",map.get("emailMsg"));
+            model.addAttribute("codeMsg",map.get("codeMsg"));
+            model.addAttribute("newPasswordMsg",map.get("newPasswordMsg"));
+            return "/site/forget";
+        }
+
+    }
+
+    @RequestMapping(path = "/sendCode", method = RequestMethod.POST)
+    @ResponseBody
+    public String sendCode(String email){
+
+        if(email==null){
+            return communityUtil.getJSONString(1,"please enter the email");
+        }
+
+        // send verification code to user email
+         Context context = new Context();
+         context.setVariable("email",email);
+
+         // generate the verification code.
+         String code = communityUtil.generateUUID().substring(0,4);
+         context.setVariable("code",code);
+
+         String content = templateEngine.process("/mail/forget",context);
+         mailClient.sendMail(email,"reset password",content);
+
+         User user = userMapper.selectByEmail(email);
+         if(user==null){
+             return communityUtil.getJSONString(1,"please enter valid email");
+         }
+
+         String redisKey = RedisKeyUtil.getCodeKey(user.getId());
+         redisTemplate.opsForValue().set(redisKey,code,300,TimeUnit.SECONDS);
+
+
+        return communityUtil.getJSONString(0,"verification code sended");
+    }
+
+
+
 
     @RequestMapping(path="/activation/{userId}/{code}", method = RequestMethod.GET)
     public String activation(Model model, @PathVariable("userId") int userId, @PathVariable("code") String code) {

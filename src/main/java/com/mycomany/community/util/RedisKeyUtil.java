@@ -14,6 +14,7 @@ public class RedisKeyUtil {
     private static final String PREFIX_UV= "uv";
     private static final String PREFIX_DAU= "dau";
     private static final String PREFIX_POST= "post";
+    private static final String PREFIX_CODE="code";
 
 
     //like: entity:entityType:entityId ->set(userId)
@@ -71,6 +72,10 @@ public class RedisKeyUtil {
     // count score of the discuss post
     public static String getPostScoreKey(){
         return PREFIX_POST + SPLIT + "score";
+    }
+
+    public static String getCodeKey(int userId){
+        return PREFIX_CODE + SPLIT + userId;
     }
 
 
