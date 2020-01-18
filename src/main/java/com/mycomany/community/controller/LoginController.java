@@ -120,9 +120,11 @@ public class LoginController implements communityConstant{
             return communityUtil.getJSONString(1,"please enter the email");
         }
 
+        User user = userMapper.selectByEmail(email);
+
         // send verification code to user email
          Context context = new Context();
-         context.setVariable("email",email);
+        context.setVariable("username",user.getUsername());
 
          // generate the verification code.
          String code = communityUtil.generateUUID().substring(0,4);
@@ -131,7 +133,7 @@ public class LoginController implements communityConstant{
          String content = templateEngine.process("/mail/forget",context);
          mailClient.sendMail(email,"reset password",content);
 
-         User user = userMapper.selectByEmail(email);
+
          if(user==null){
              return communityUtil.getJSONString(1,"please enter valid email");
          }

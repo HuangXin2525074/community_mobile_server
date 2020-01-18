@@ -152,7 +152,9 @@ public class UserService implements communityConstant {
         }
 
         String redisKey = RedisKeyUtil.getCodeKey(u.getId());
-        String code =(String)redisTemplate.opsForValue().get(redisKey);
+        String code =redisTemplate.opsForValue().get(redisKey).toString();
+
+        System.out.println("code is:"+code);
 
 
         if(code==null){
